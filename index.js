@@ -6,12 +6,12 @@ const { pipeline: _pipeline, Transform } = require('stream');
 const pipeline = promisify(_pipeline);
 
 class PTransform extends Transform {
-  constructor(options) {
+  constructor(options = {}) {
     // transform is used locally, forward undefined to prevent conflicts.
     super({ objectMode: true, ...options });
 
     this.logName = options.logName || Math.random().toString(36).slice(7);
-    this.queue = new PQueue();
+    this.queue = new PQueue(options.queueOptions);
 
     this.debug = debug(`p-transform:${this.logName}`);
 
@@ -31,7 +31,19 @@ class PTransform extends Transform {
     }
   }
 
-  async _executeTransform(chunk, enc) {
+  /**
+   * Wait for queue idle.
+   * @return Promise
+   */
+  flushQueue() {
+    return this.queue.onIdle();
+  }
+
+  /**
+   * Queued transform operation.
+   * @return Promise
+   */
+  async queuedTransform(chunk, enc) {
     try {
       const maybeChunk = await this._transform(chunk, enc);
       if (maybeChunk) {
@@ -45,18 +57,18 @@ class PTransform extends Transform {
 
   _write(chunk, enc, callback) {
     this.debug('_transform %s', chunk.path);
-    this.queue.add(() => this._executeTransform(chunk, enc));
+    this.queue.add(() => this.queuedTransform(chunk, enc));
     setTimeout(() => callback());
   }
 
   _flush(cb) {
     this.debug('_flush');
-    this.queue.onIdle().then(() => cb());
+    this.flushQueue().then(() => cb());
   }
 }
 
 module.exports = {
   PTransform,
   pipeline,
-  transform: (transform) => new PTransform({ transform }),
+  transform: (transform, logName) => new PTransform({ transform, logName }),
 };
