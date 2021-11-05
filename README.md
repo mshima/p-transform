@@ -26,6 +26,30 @@ Use `DEBUG=p-transform:*` environment variable.
 
 For custom debug name set `logName` option at PTransform constructor or `transform` argument.
 
+## License
+
+Apache-2.0
+
+# API
+
+## Classes
+
+<dl>
+<dt><a href="#PTransform">PTransform</a></dt>
+<dd></dd>
+</dl>
+
+## Functions
+
+<dl>
+<dt><a href="#transform">transform(transform, logName)</a></dt>
+<dd><p>Shortcut to create a PTransform with transform and logName.</p>
+</dd>
+<dt><a href="#passthrough">passthrough(spy, logName)</a></dt>
+<dd><p>Shortcut to create a passthrough PTransform with transform and logName.</p>
+</dd>
+</dl>
+
 <a name="PTransform"></a>
 
 ## PTransform
@@ -72,6 +96,28 @@ Queued transform operation.
 | chunk    | <code>Object</code> |
 | encoding | <code>String</code> |
 
-## License
+<a name="transform"></a>
 
-Apache-2.0
+## transform(transform, logName)
+
+Shortcut to create a PTransform with transform and logName.
+
+**Kind**: global function
+
+| Param     | Type                  |
+| --------- | --------------------- |
+| transform | <code>function</code> |
+| logName   | <code>String</code>   |
+
+<a name="passthrough"></a>
+
+## passthrough(spy, logName)
+
+Shortcut to create a passthrough PTransform with transform and logName.
+
+**Kind**: global function
+
+| Param   | Type                  |
+| ------- | --------------------- |
+| spy     | <code>function</code> |
+| logName | <code>String</code>   |

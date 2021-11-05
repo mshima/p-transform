@@ -1,8 +1,6 @@
 'use strict';
 
-const { PassThrough, Transform } = require('stream');
-
-const { transform, pipeline } = require('../index.js');
+const { transform, passthrough, pipeline } = require('../index.js');
 const sinon = require('sinon');
 const assert = require('assert');
 const SAMPLES_SIZE = 50;
@@ -25,13 +23,9 @@ describe('PTransform', () => {
     }
     afterSpy = sinon.stub();
 
-    source = new PassThrough({ objectMode: true });
-    dest = new Transform({
-      objectMode: true,
-      transform: (file, _encoding, callback) => {
-        destSamples.push(file);
-        callback();
-      },
+    source = passthrough();
+    dest = transform((file) => {
+      destSamples.push(file);
     });
     setImmediate(() => {
       samples.forEach((sample) => source.write(sample));
@@ -48,7 +42,7 @@ describe('PTransform', () => {
             setTimeout(() => {
               sample.spy();
               resolve(sample);
-            }, sample.sleep * 10);
+            }, sample.sleep * 15);
           });
         }),
         dest

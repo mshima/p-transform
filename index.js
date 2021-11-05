@@ -79,8 +79,29 @@ class PTransform extends Transform {
   }
 }
 
+/**
+ * Shortcut to create a PTransform with transform and logName.
+ *
+ * @param {Function} transform
+ * @param {String} logName
+ */
+const transform = (transform, logName) => new PTransform({ transform, logName });
+
+/**
+ * Shortcut to create a passthrough PTransform with transform and logName.
+ *
+ * @param {Function} spy
+ * @param {String} logName
+ */
+const passthrough = (spy = () => {}, logName) =>
+  transform(async function (chunk, encoding) {
+    await spy.call(this, chunk, encoding);
+    return chunk;
+  }, logName);
+
 module.exports = {
   PTransform,
   pipeline,
-  transform: (transform, logName) => new PTransform({ transform, logName }),
+  transform,
+  passthrough,
 };
