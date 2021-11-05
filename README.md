@@ -26,6 +26,52 @@ Use `DEBUG=p-transform:*` environment variable.
 
 For custom debug name set `logName` option at PTransform constructor or `transform` argument.
 
+<a name="PTransform"></a>
+
+## PTransform
+
+**Kind**: global class
+
+- [PTransform](#PTransform)
+  - [new PTransform([options])](#new_PTransform_new)
+  - [.flushQueue()](#PTransform+flushQueue) ⇒
+  - [.queuedTransform(chunk, encoding)](#PTransform+queuedTransform) ⇒
+
+<a name="new_PTransform_new"></a>
+
+### new PTransform([options])
+
+PTransform
+
+| Param                  | Type                  | Description                            |
+| ---------------------- | --------------------- | -------------------------------------- |
+| [options]              | <code>Object</code>   | Options object forwarded to Transform. |
+| [options.logName]      | <code>String</code>   | Custom name for logger.                |
+| [options.transform]    | <code>function</code> | Transform function.                    |
+| [options.queueOptions] | <code>Object</code>   | Options forwarded to PQueue instance.  |
+
+<a name="PTransform+flushQueue"></a>
+
+### pTransform.flushQueue() ⇒
+
+Wait for queue idle.
+
+**Kind**: instance method of [<code>PTransform</code>](#PTransform)
+**Returns**: Promise<void>
+<a name="PTransform+queuedTransform"></a>
+
+### pTransform.queuedTransform(chunk, encoding) ⇒
+
+Queued transform operation.
+
+**Kind**: instance method of [<code>PTransform</code>](#PTransform)
+**Returns**: Promise
+
+| Param    | Type                |
+| -------- | ------------------- |
+| chunk    | <code>Object</code> |
+| encoding | <code>String</code> |
+
 ## License
 
 Apache-2.0

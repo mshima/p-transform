@@ -13,6 +13,7 @@
   "scripts": {
     "pretest": "prettier --check . && eslint .",
     "test": "mocha",
+    "doc": "jsdoc2md index.js",
     "fix": "prettier --write . && eslint . --fix"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
+    "jsdoc-to-markdown": "^7.1.0",
     "mocha": "^9.0.0",
     "prettier": "^2.3.1",
     "sinon": "^12.0.1"

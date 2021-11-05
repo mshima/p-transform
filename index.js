@@ -6,6 +6,14 @@ const { pipeline: _pipeline, Transform } = require('stream');
 const pipeline = promisify(_pipeline);
 
 class PTransform extends Transform {
+  /**
+   * PTransform
+   *
+   * @param {Object} [options] - Options object forwarded to Transform.
+   * @param {String} [options.logName] - Custom name for logger.
+   * @param {Function} [options.transform] - Transform function.
+   * @param {Object} [options.queueOptions] - Options forwarded to PQueue instance.
+   */
   constructor(options = {}) {
     // transform is used locally, forward undefined to prevent conflicts.
     super({ objectMode: true, ...options });
@@ -33,7 +41,8 @@ class PTransform extends Transform {
 
   /**
    * Wait for queue idle.
-   * @return Promise
+   *
+   * @return Promise<void>
    */
   flushQueue() {
     return this.queue.onIdle();
@@ -41,11 +50,14 @@ class PTransform extends Transform {
 
   /**
    * Queued transform operation.
+   *
+   * @param {Object} chunk
+   * @param {String} encoding
    * @return Promise
    */
-  async queuedTransform(chunk, enc) {
+  async queuedTransform(chunk, encoding) {
     try {
-      const maybeChunk = await this._transform(chunk, enc);
+      const maybeChunk = await this._transform(chunk, encoding);
       if (maybeChunk) {
         this.push(maybeChunk);
       }
@@ -61,9 +73,9 @@ class PTransform extends Transform {
     setTimeout(() => callback());
   }
 
-  _flush(cb) {
+  _flush(callback) {
     this.debug('_flush');
-    this.flushQueue().then(() => cb());
+    this.flushQueue().then(() => callback());
   }
 }
 
