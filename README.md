@@ -20,6 +20,12 @@ await pipeline(
 )
 ```
 
+## Debug
+
+Use `DEBUG=p-transform:*` environment variable.
+
+For custom debug name set `logName` option at PTransform constructor or `transform` argument.
+
 ## License
 
 Apache-2.0
