@@ -6,6 +6,9 @@
   "bugs": "https://github.com/mshima/p-transform/issues",
   "files": [],
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=12.10.0"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/mshima/p-transform.git"
