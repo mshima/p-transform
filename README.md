@@ -39,6 +39,14 @@ Apache-2.0
 <dd></dd>
 </dl>
 
+## Constants
+
+<dl>
+<dt><a href="#pipeline">pipeline</a></dt>
+<dd><p>Promisified pipeline</p>
+</dd>
+</dl>
+
 ## Functions
 
 <dl>
@@ -46,7 +54,10 @@ Apache-2.0
 <dd><p>Shortcut to create a PTransform with transform and logName.</p>
 </dd>
 <dt><a href="#passthrough">passthrough(spy, logName)</a></dt>
-<dd><p>Shortcut to create a passthrough PTransform with transform and logName.</p>
+<dd><p>Shortcut to create a passthrough PTransform with spy and logName.</p>
+</dd>
+<dt><a href="#filter">filter(filter, logName)</a></dt>
+<dd><p>Shortcut to create a filter PTransform with filter and logName.</p>
 </dd>
 </dl>
 
@@ -58,6 +69,7 @@ Apache-2.0
 
 - [PTransform](#PTransform)
   - [new PTransform([options])](#new_PTransform_new)
+  - [.name(name)](#PTransform+name) ⇒ [<code>PTransform</code>](#PTransform)
   - [.flushQueue()](#PTransform+flushQueue) ⇒
   - [.queuedTransform(chunk, encoding)](#PTransform+queuedTransform) ⇒
 
@@ -73,6 +85,19 @@ PTransform
 | [options.logName]      | <code>String</code>   | Custom name for logger.                |
 | [options.transform]    | <code>function</code> | Transform function.                    |
 | [options.queueOptions] | <code>Object</code>   | Options forwarded to PQueue instance.  |
+
+<a name="PTransform+name"></a>
+
+### pTransform.name(name) ⇒ [<code>PTransform</code>](#PTransform)
+
+Set log name.
+
+**Kind**: instance method of [<code>PTransform</code>](#PTransform)
+**Returns**: [<code>PTransform</code>](#PTransform) - this
+
+| Param | Type                |
+| ----- | ------------------- |
+| name  | <code>String</code> |
 
 <a name="PTransform+flushQueue"></a>
 
@@ -96,6 +121,13 @@ Queued transform operation.
 | chunk    | <code>Object</code> |
 | encoding | <code>String</code> |
 
+<a name="pipeline"></a>
+
+## pipeline
+
+Promisified pipeline
+
+**Kind**: global constant
 <a name="transform"></a>
 
 ## transform(transform, logName)
@@ -113,11 +145,24 @@ Shortcut to create a PTransform with transform and logName.
 
 ## passthrough(spy, logName)
 
-Shortcut to create a passthrough PTransform with transform and logName.
+Shortcut to create a passthrough PTransform with spy and logName.
 
 **Kind**: global function
 
 | Param   | Type                  |
 | ------- | --------------------- |
 | spy     | <code>function</code> |
+| logName | <code>String</code>   |
+
+<a name="filter"></a>
+
+## filter(filter, logName)
+
+Shortcut to create a filter PTransform with filter and logName.
+
+**Kind**: global function
+
+| Param   | Type                  |
+| ------- | --------------------- |
+| filter  | <code>function</code> |
 | logName | <code>String</code>   |
