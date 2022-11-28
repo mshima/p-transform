@@ -1,6 +1,6 @@
-import { filter, transform, passthrough, pipeline } from '../src/index.js';
-import sinon from 'sinon';
-import assert from 'assert';
+import assert from 'node:assert';
+import {stub} from 'sinon';
+import {filter, transform, passthrough, pipeline} from '../src/index.js';
 
 const SAMPLES_SIZE = 100;
 
@@ -50,7 +50,7 @@ describe('PTransform', () => {
         const sample = {
           order: i,
           get resolveValue() {
-            return shouldReturn ? { sample: this } : undefined;
+            return shouldReturn ? {sample: this} : undefined;
           },
         };
 
@@ -58,14 +58,14 @@ describe('PTransform', () => {
 
         {
           let resolve;
-          const spy = sinon.stub();
+          const spy = stub();
           const promise = new Promise(inResolve => {
             resolve = inResolve;
           });
           sample.transformStep = {
             spy,
             promise,
-            resolve: () => {
+            resolve() {
               spy();
               resolve(sample.resolveValue);
             },
@@ -74,7 +74,7 @@ describe('PTransform', () => {
 
         {
           let resolve;
-          const spy = sinon.stub();
+          const spy = stub();
           const promise = new Promise(inResolve => {
             resolve = inResolve;
           });
@@ -90,7 +90,10 @@ describe('PTransform', () => {
       assert.notDeepStrictEqual(samplesToResolve, samples);
 
       setImmediate(async () => {
-        samples.forEach(sample => sourceTransform.write(sample));
+        for (const sample of samples) {
+          sourceTransform.write(sample);
+        }
+
         sourceTransform.end();
         for (const sample of samplesToResolve) {
           sample.transformStep.resolve();
@@ -98,7 +101,7 @@ describe('PTransform', () => {
         }
       });
 
-      afterSpy = sinon.stub();
+      afterSpy = stub();
 
       sourceTransform = passthrough().name('sourceTransform');
       destinationTransform = transform(sample => {
@@ -111,9 +114,12 @@ describe('PTransform', () => {
     describe('transform pipeline', () => {
       beforeEach(async () => {
         testTransform = transform(async sample => {
-          const ret = await sample.transformStep.promise;
-          if (!ret) sample.destinationStep.resolve();
-          return ret;
+          const returnValue = await sample.transformStep.promise;
+          if (!returnValue) {
+            sample.destinationStep.resolve();
+          }
+
+          return returnValue;
         });
 
         await pipeline(
@@ -152,9 +158,12 @@ describe('PTransform', () => {
     describe('filter pipeline', () => {
       beforeEach(async () => {
         testTransform = filter(async sample => {
-          const ret = await sample.transformStep.promise;
-          if (!ret) sample.destinationStep.resolve();
-          return ret;
+          const returnValue = await sample.transformStep.promise;
+          if (!returnValue) {
+            sample.destinationStep.resolve();
+          }
+
+          return returnValue;
         });
 
         await pipeline(sourceTransform, testTransform, destinationTransform);
