@@ -15,7 +15,9 @@
     }
   },
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "doc": "jsdoc2md index.js",
     "fix": "prettier --write . && eslint . --fix",
