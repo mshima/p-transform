@@ -1,5 +1,5 @@
 import debug from 'debug';
-import PQueue, { type Options as PQueueOptions} from 'p-queue';
+import PQueue, { type Options as PQueueOptions } from 'p-queue';
 
 import { promisify } from 'util';
 import { pipeline as _pipeline, Transform, type TransformCallback } from 'stream';
@@ -64,18 +64,14 @@ export default class PTransform extends Transform {
     if (this._debug.enabled) {
       this._debug('New PTransform');
       this.on('end', () => this._debug('event:end'));
-      this.on('error', (error) => this._debug('event:error', error));
+      this.on('error', error => this._debug('event:error', error));
       this.on('finish', () => this._debug('event:finish'));
       this.on('drain', () => this._debug('event:drain'));
       this.on('close', () => this._debug('event:close'));
       this.on('unpipe', () => this._debug('event:unpipe'));
       this.on('pipe', () => this._debug('event:pipe'));
-      this.queue.on('add', () =>
-        this._debug('++ task: queue size %d, pending %d', this.queue.size, this.queue.pending)
-      );
-      this.queue.on('next', () =>
-        this._debug('-- task: queue size %d, pending %d', this.queue.size, this.queue.pending)
-      );
+      this.queue.on('add', () => this._debug('++ task: queue size %d, pending %d', this.queue.size, this.queue.pending));
+      this.queue.on('next', () => this._debug('-- task: queue size %d, pending %d', this.queue.size, this.queue.pending));
     }
     return this._debug;
   }
@@ -108,7 +104,8 @@ export default class PTransform extends Transform {
     }
   }
 
-  _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void {    this.debug('_transform %s', chunk.path);
+  _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
+    this.debug('_transform %s', chunk.path);
     this.queue.add(() => this.queuedTransform(chunk, encoding));
     setTimeout(() => callback());
   }

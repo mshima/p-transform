@@ -59,7 +59,7 @@ describe('PTransform', () => {
         {
           let resolve;
           const spy = sinon.stub();
-          const promise = new Promise((inResolve) => {
+          const promise = new Promise(inResolve => {
             resolve = inResolve;
           });
           sample.transformStep = {
@@ -75,7 +75,7 @@ describe('PTransform', () => {
         {
           let resolve;
           const spy = sinon.stub();
-          const promise = new Promise((inResolve) => {
+          const promise = new Promise(inResolve => {
             resolve = inResolve;
           });
           sample.destinationStep = {
@@ -90,7 +90,7 @@ describe('PTransform', () => {
       assert.notDeepStrictEqual(samplesToResolve, samples);
 
       setImmediate(async () => {
-        samples.forEach((sample) => sourceTransform.write(sample));
+        samples.forEach(sample => sourceTransform.write(sample));
         sourceTransform.end();
         for (const sample of samplesToResolve) {
           sample.transformStep.resolve();
@@ -101,7 +101,7 @@ describe('PTransform', () => {
       afterSpy = sinon.stub();
 
       sourceTransform = passthrough().name('sourceTransform');
-      destinationTransform = transform((sample) => {
+      destinationTransform = transform(sample => {
         destSamples.push(sample);
         sample.destinationStep.spy();
         sample.destinationStep.resolve();
@@ -110,7 +110,7 @@ describe('PTransform', () => {
 
     describe('transform pipeline', () => {
       beforeEach(async () => {
-        testTransform = transform(async (sample) => {
+        testTransform = transform(async sample => {
           const ret = await sample.transformStep.promise;
           if (!ret) sample.destinationStep.resolve();
           return ret;
@@ -119,8 +119,8 @@ describe('PTransform', () => {
         await pipeline(
           sourceTransform,
           testTransform,
-          transform((chunk) => chunk.sample),
-          destinationTransform
+          transform(chunk => chunk.sample),
+          destinationTransform,
         );
 
         afterSpy();
@@ -144,14 +144,14 @@ describe('PTransform', () => {
       it('destination samples should match the resolved values', () => {
         assert.deepStrictEqual(
           destSamples,
-          samplesToResolve.filter((sample) => sample.resolveValue)
+          samplesToResolve.filter(sample => sample.resolveValue),
         );
       });
     });
 
     describe('filter pipeline', () => {
       beforeEach(async () => {
-        testTransform = filter(async (sample) => {
+        testTransform = filter(async sample => {
           const ret = await sample.transformStep.promise;
           if (!ret) sample.destinationStep.resolve();
           return ret;
@@ -180,14 +180,14 @@ describe('PTransform', () => {
       it('destination samples should match the filtered samples', () => {
         assert.deepStrictEqual(
           destSamples,
-          samplesToResolve.filter((sample) => sample.resolveValue)
+          samplesToResolve.filter(sample => sample.resolveValue),
         );
       });
     });
 
     describe('passthrough pipeline', () => {
       beforeEach(async () => {
-        testTransform = passthrough((sample) => sample.transformStep.promise);
+        testTransform = passthrough(sample => sample.transformStep.promise);
 
         await pipeline(sourceTransform, testTransform, destinationTransform);
 
