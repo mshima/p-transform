@@ -19,9 +19,9 @@
     "dist"
   ],
   "scripts": {
-    "doc": "jsdoc2md index.js",
-    "fix": "prettier --write . && eslint . --fix",
-    "pretest": "prettier --check . && eslint .",
+    "doc": "jsdoc2md src/index.js",
+    "fix": "prettier --write . && xo --fix",
+    "pretest": "prettier --check . && xo",
     "test": "mocha"
   },
   "dependencies": {
