@@ -14,9 +14,8 @@
       "import": "./dist/index.js"
     }
   },
-  "main": "index.js",
   "types": "./dist/index.d.ts",
-  "files": [],
+  "files": ["dist"],
   "scripts": {
     "doc": "jsdoc2md index.js",
     "fix": "prettier --write . && eslint . --fix",

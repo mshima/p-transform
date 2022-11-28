@@ -23,7 +23,7 @@ describe('PTransform', () => {
 
     beforeEach(() => {
       instance = transform(() => {});
-      instance.debug;
+      instance.debug();
     });
 
     it('should not allow to set name', () => {

@@ -144,7 +144,7 @@ export const transform = (transform: TransformMethod, logName?: string) => new P
 /**
  * Shortcut to create a passthrough PTransform with spy and logName.
  */
-export const passthrough = (spy?: (this: Transform, chunk: any, encoding?: BufferEncoding) => void, logName?: string) =>
+export const passthrough = (spy?: (this: Transform, chunk: any, encoding?: BufferEncoding) => unknown, logName?: string) =>
   new PTransform({
     async transform(chunk: any, encoding?: BufferEncoding): Promise<any> {
       await spy?.call(this, chunk, encoding);
