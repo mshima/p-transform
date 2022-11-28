@@ -10,7 +10,7 @@ A [Transform](https://nodejs.org/api/stream.html#implementing-a-transform-stream
 Promisified `pipeline` and `transform` shortcut are provided for convenience.
 
 ```
-const { PTransform, transform, pipeline } = require('p-transform');
+import PTransform, { transform, pipeline } from 'p-transform';
 
 await pipeline(
   new PTransform({
