@@ -1,15 +1,15 @@
-const debug = require('debug');
-const { default: PQueue } = require('p-queue');
+import debug from 'debug';
+import PQueue from 'p-queue';
 
-const { promisify } = require('util');
-const { pipeline: _pipeline, Transform } = require('stream');
+import { promisify } from 'util';
+import { pipeline as _pipeline, Transform } from 'stream';
 
 /**
  * Promisified pipeline
  */
-const pipeline = promisify(_pipeline);
+export const pipeline = promisify(_pipeline);
 
-class PTransform extends Transform {
+export default class PTransform extends Transform {
   /**
    * PTransform
    *
@@ -113,7 +113,7 @@ class PTransform extends Transform {
  * @param {Function} transform
  * @param {String} logName
  */
-const transform = (transform, logName) => new PTransform({ transform, logName, logPrefix: 'transform' });
+export const transform = (transform, logName) => new PTransform({ transform, logName, logPrefix: 'transform' });
 
 /**
  * Shortcut to create a passthrough PTransform with spy and logName.
@@ -121,7 +121,7 @@ const transform = (transform, logName) => new PTransform({ transform, logName, l
  * @param {Function} spy
  * @param {String} logName
  */
-const passthrough = (spy = () => {}, logName) =>
+export const passthrough = (spy = () => {}, logName) =>
   new PTransform({
     transform: async function (chunk, encoding) {
       await spy.call(this, chunk, encoding);
@@ -137,7 +137,7 @@ const passthrough = (spy = () => {}, logName) =>
  * @param {Function} filter
  * @param {String} logName
  */
-const filter = (filter = () => {}, logName) =>
+export const filter = (filter = () => {}, logName) =>
   new PTransform({
     transform: async function (chunk, encoding) {
       return (await filter.call(this, chunk, encoding)) ? chunk : undefined;
@@ -145,11 +145,3 @@ const filter = (filter = () => {}, logName) =>
     logName,
     logPrefix: 'filter',
   });
-
-module.exports = {
-  PTransform,
-  pipeline,
-  transform,
-  passthrough,
-  filter,
-};

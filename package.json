@@ -6,6 +6,7 @@
   "bugs": "https://github.com/mshima/p-transform/issues",
   "files": [],
   "license": "Apache-2.0",
+  "type": "module",
   "engines": {
     "node": ">=12.10.0"
   },
@@ -21,7 +22,7 @@
   },
   "dependencies": {
     "debug": "^4.3.2",
-    "p-queue": "^6.6.2"
+    "p-queue": "^7.3.0"
   },
   "devDependencies": {
     "eslint": "^7.26.0",

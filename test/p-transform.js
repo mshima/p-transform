@@ -1,8 +1,7 @@
-'use strict';
+import { filter, transform, passthrough, pipeline } from '../src/index.js';
+import sinon from 'sinon';
+import assert from 'assert';
 
-const { filter, transform, passthrough, pipeline } = require('../index.js');
-const sinon = require('sinon');
-const assert = require('assert');
 const SAMPLES_SIZE = 100;
 
 describe('PTransform', () => {
