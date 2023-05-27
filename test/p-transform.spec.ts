@@ -1,6 +1,8 @@
 import assert from 'node:assert';
+import {Readable} from 'node:stream';
 import {stub} from 'sinon';
-import {filter, transform, passthrough, pipeline} from '../src/index.js';
+import {jestExpect} from 'esmocha';
+import {filter, passthrough, pipeline, transform} from '../src/index.js';
 
 const SAMPLES_SIZE = 100;
 
@@ -11,11 +13,6 @@ describe('PTransform', () => {
     beforeEach(() => {
       instance = transform(() => {});
     });
-
-    it('should allow to set name if debug not initialized', () => {
-      instance.name('foo');
-      assert.equal(instance.debug.namespace, 'p-transform:foo');
-    });
   });
 
   describe('with debug initialized', () => {
@@ -23,7 +20,6 @@ describe('PTransform', () => {
 
     beforeEach(() => {
       instance = transform(() => {});
-      instance.debug();
     });
 
     it('should not allow to set name', () => {
@@ -90,11 +86,6 @@ describe('PTransform', () => {
       assert.notDeepStrictEqual(samplesToResolve, samples);
 
       setImmediate(async () => {
-        for (const sample of samples) {
-          sourceTransform.write(sample);
-        }
-
-        sourceTransform.end();
         for (const sample of samplesToResolve) {
           sample.transformStep.resolve();
           await sample.destinationStep.promise;
@@ -103,12 +94,12 @@ describe('PTransform', () => {
 
       afterSpy = stub();
 
-      sourceTransform = passthrough().name('sourceTransform');
-      destinationTransform = transform(sample => {
+      sourceTransform = Readable.from(samples);
+      destinationTransform = transform(async sample => {
         destSamples.push(sample);
         sample.destinationStep.spy();
         sample.destinationStep.resolve();
-      }).name('destination');
+      });
     });
 
     describe('transform pipeline', () => {
@@ -134,13 +125,19 @@ describe('PTransform', () => {
 
       it('transform spies should be called once', () => {
         for (const sample of samples) {
-          assert(sample.transformStep.spy.calledOnce);
+          jestExpect(sample.transformStep.spy.callCount).toBe(1);
         }
       });
       it('destination spies should be conditionally called', () => {
         for (const sample of samples) {
           assert.equal(sample.destinationStep.spy.callCount, sample.resolveValue ? 1 : 0);
         }
+      });
+      it('destination spies called should match expected value', () => {
+        assert.equal(
+          samples.filter(sample => sample.destinationStep.spy.callCount).length,
+          samples.filter(sample => sample.resolveValue).length,
+        );
       });
       it('spies should be called before afterSpy', () => {
         for (const sample of samples) {
