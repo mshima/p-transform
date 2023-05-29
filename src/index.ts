@@ -1,6 +1,8 @@
+import readableStream from 'readable-stream';
 import {OutOfOrder, type TransformMethod} from './queue.js';
 
-export {pipeline} from 'node:stream/promises';
+const {pipeline} = readableStream.promises;
+export {pipeline};
 
 export const transform = <ChunkType = any>(transform: TransformMethod<ChunkType>) => {
   return new OutOfOrder<ChunkType>().createTransformStream(transform);

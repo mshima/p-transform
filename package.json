@@ -32,7 +32,6 @@
     "readable-stream": "^4.4.0"
   },
   "devDependencies": {
-    "@types/readable-stream": "^2.3.15",
     "c8": "^7.14.0",
     "esmocha": "^1.0.1",
     "jsdoc-to-markdown": "^8.0.0",

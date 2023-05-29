@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import {Readable} from 'node:stream';
+import {Readable} from 'readable-stream';
 import {stub} from 'sinon';
 import {jestExpect} from 'esmocha';
 import {filter, passthrough, pipeline, transform} from '../src/index.js';
