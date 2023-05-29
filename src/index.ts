@@ -1,6 +1,8 @@
 import readableStream from 'readable-stream';
 import {OutOfOrder, type TransformMethod} from './queue.js';
 
+export * from './queue.js';
+
 const {pipeline} = readableStream.promises;
 export {pipeline};
 
