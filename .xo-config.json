@@ -1,20 +1,21 @@
 {
   "space": true,
-  "envs": ["es2020", "mocha"],
+  "envs": ["es2022"],
   "prettier": true,
   "rules": {
     "@typescript-eslint/naming-convention": "off",
     "@typescript-eslint/no-redundant-type-constituents": "off",
-    "@typescript-eslint/no-unsafe-assignment": "off",
-    "@typescript-eslint/no-unsafe-return": "off"
+    "@typescript-eslint/member-ordering": "off"
   },
   "overrides": [
     {
       "files": "test/*",
-      "envs": ["es2020", "node", "mocha"],
+      "envs": ["es2022", "node"],
       "rules": {
-        "@typescript-eslint/no-unsafe-call": "off",
         "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
         "no-await-in-loop": "off"
       }
     }

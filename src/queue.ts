@@ -1,5 +1,4 @@
 import {Readable, Duplex} from 'node:stream';
-
 import PQueue, {type Options, type QueueAddOptions} from 'p-queue';
 
 type OutsidePromise<T> = Promise<T> & {resolve: () => void; reject: (error: any) => void};
@@ -8,6 +7,7 @@ export type TransformLike<T = any> = {push: (chunk: T) => void};
 
 export type TransformMethod<T = any> = (this: TransformLike<T>, chunk: T) => PromiseLike<T | undefined> | T | undefined;
 
+// eslint-disable-next-line @typescript-eslint/promise-function-async
 const createPromise = <T>() => {
   let resolve;
   let reject;
@@ -16,6 +16,7 @@ const createPromise = <T>() => {
     reject = promiseReject;
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   return Object.assign(promise, {resolve, reject});
 };
 
@@ -31,6 +32,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
   #transform: TransformMethod<ChunkType>;
 
   constructor(transform: TransformMethod<ChunkType>, pqueueOptions?: Options<any, QueueAddOptions>) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.#queue = new PQueue(pqueueOptions);
     this.#resolve = createPromise<ChunkType>();
     this.#nextPromise = createPromise<ChunkType>();
@@ -38,7 +40,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
   }
 
   async *[Symbol.asyncIterator](): AsyncIterator<ChunkType> {
-    while (!this.#closed) {
+    while (!this.#closed || this.#queue.size > 0 || this.#queue.pending > 0) {
       // eslint-disable-next-line no-await-in-loop
       await this.#nextPromise;
       const results = this.#results;
@@ -96,7 +98,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
       readable: Readable.from(this),
       writable: Duplex.from(async source => {
         for await (const chunk of source) {
-          this.push(chunk);
+          this.push(chunk as ChunkType);
         }
 
         await this.close();
