@@ -1,5 +1,9 @@
-import {Readable, Duplex} from 'node:stream';
+import type {Readable as NodeReadable, Duplex as NodeDuplex} from 'node:stream';
+import {Readable as _Readable, Duplex as _Duplex} from 'readable-stream';
 import PQueue, {type Options, type QueueAddOptions} from 'p-queue';
+
+const Readable = _Readable as typeof NodeReadable;
+const Duplex = _Duplex as typeof NodeDuplex;
 
 type OutsidePromise<T> = Promise<T> & {resolve: () => void; reject: (error: any) => void};
 
@@ -93,7 +97,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
       );
   }
 
-  duplex(): Duplex {
+  duplex(): NodeDuplex {
     return Duplex.from({
       readable: Readable.from(this),
       writable: Duplex.from(async source => {

@@ -1,8 +1,9 @@
 import assert from 'node:assert';
+import {pipeline} from 'node:stream/promises';
 import {describe, beforeEach, it, expect, vitest} from 'vitest';
 import {Readable} from 'readable-stream';
 import {stub} from 'sinon';
-import {filter, passthrough, pipeline, transform} from '../src/index.js';
+import {filter, passthrough, transform} from '../src/index.js';
 
 const SAMPLES_SIZE = 100;
 
