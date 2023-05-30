@@ -1,20 +1,12 @@
 import assert from 'node:assert';
+import {describe, beforeEach, it, expect} from 'vitest';
 import {Readable} from 'readable-stream';
 import {stub} from 'sinon';
-import {jestExpect} from 'esmocha';
 import {filter, passthrough, pipeline, transform} from '../src/index.js';
 
 const SAMPLES_SIZE = 100;
 
 describe('PTransform', () => {
-  describe('with debug not initialized', () => {
-    let instance;
-
-    beforeEach(() => {
-      instance = transform(() => {});
-    });
-  });
-
   describe('with debug initialized', () => {
     let instance;
 
@@ -125,7 +117,7 @@ describe('PTransform', () => {
 
       it('transform spies should be called once', () => {
         for (const sample of samples) {
-          jestExpect(sample.transformStep.spy.callCount).toBe(1);
+          expect(sample.transformStep.spy.callCount).toBe(1);
         }
       });
       it('destination spies should be conditionally called', () => {
