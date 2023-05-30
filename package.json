@@ -24,7 +24,7 @@
     "fix": "prettier --write . && xo --fix",
     "prepare": "npm run build",
     "pretest": "prettier --check . && xo",
-    "test": "esmocha"
+    "test": "vitest run"
   },
   "dependencies": {
     "@types/node": "^16.18.31",
@@ -32,13 +32,13 @@
     "readable-stream": "^4.3.0"
   },
   "devDependencies": {
-    "c8": "^7.14.0",
-    "esmocha": "^1.0.1",
+    "@vitest/coverage-c8": "^0.31.2",
     "jsdoc-to-markdown": "^8.0.0",
     "prettier": "^2.8.0",
     "prettier-plugin-packagejson": "^2.3.0",
     "sinon": "^15.0.0",
     "typescript": "^5.0.4",
+    "vitest": "^0.31.2",
     "xo": "^0.53.1"
   },
   "engines": {
