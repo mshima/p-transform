@@ -91,7 +91,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
       );
   }
 
-  duplex() {
+  duplex(): Duplex {
     return Duplex.from({
       readable: Readable.from(this),
       writable: Duplex.from(async source => {
