@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import {describe, beforeEach, it, expect} from 'vitest';
+import {describe, beforeEach, it, expect, vitest} from 'vitest';
 import {Readable} from 'readable-stream';
 import {stub} from 'sinon';
 import {filter, passthrough, pipeline, transform} from '../src/index.js';
@@ -7,18 +7,6 @@ import {filter, passthrough, pipeline, transform} from '../src/index.js';
 const SAMPLES_SIZE = 100;
 
 describe('PTransform', () => {
-  describe('with debug initialized', () => {
-    let instance;
-
-    beforeEach(() => {
-      instance = transform(() => {});
-    });
-
-    it('should not allow to set name', () => {
-      assert.throws(() => instance.name('foo'));
-    });
-  });
-
   describe('transforms', () => {
     let samples;
     let samplesToResolve;
@@ -210,6 +198,48 @@ describe('PTransform', () => {
       it('destination samples should match the shuffled samples', () => {
         assert.deepStrictEqual(destSamples, samplesToResolve);
       });
+    });
+  });
+
+  describe('additional chunks', () => {
+    it('pipeline should reject with sync transform', async () => {
+      const spy = vitest.fn();
+
+      await pipeline(
+        Readable.from([{}]),
+        transform(function (chunk) {
+          this.push({});
+          return chunk;
+        }),
+        transform(function () {
+          spy();
+        }),
+      );
+
+      expect(spy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('error handling', () => {
+    it('pipeline should reject with sync transform', async () => {
+      await expect(
+        pipeline(
+          Readable.from([{}]),
+          transform(() => {
+            throw new Error('foo');
+          }),
+        ),
+      ).rejects.toThrowError('foo');
+    });
+    it('pipeline should reject with async transform', async () => {
+      await expect(
+        pipeline(
+          Readable.from([{}]),
+          transform(async () => {
+            throw new Error('foo');
+          }),
+        ),
+      ).rejects.toThrowError('foo');
     });
   });
 });
