@@ -1,4 +1,4 @@
-import {Readable, Transform, Duplex} from 'readable-stream';
+import {Readable, Duplex} from 'node:stream';
 
 import PQueue, {type Options, type QueueAddOptions} from 'p-queue';
 
@@ -28,11 +28,13 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
   #nextPromise: OutsidePromise<ChunkType>;
   #resolve: OutsidePromise<ChunkType>;
   #results: ChunkType[] = [];
+  #transform: TransformMethod<ChunkType>;
 
-  constructor(options?: Options<any, QueueAddOptions>) {
-    this.#queue = new PQueue(options);
+  constructor(transform: TransformMethod<ChunkType>, pqueueOptions?: Options<any, QueueAddOptions>) {
+    this.#queue = new PQueue(pqueueOptions);
     this.#resolve = createPromise<ChunkType>();
     this.#nextPromise = createPromise<ChunkType>();
+    this.#transform = transform;
   }
 
   async *[Symbol.asyncIterator](): AsyncIterator<ChunkType> {
@@ -51,61 +53,62 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
     this.#resolve.resolve();
   }
 
+  push(chunk: ChunkType) {
+    const transformContext: TransformLike<ChunkType> = {
+      push: chunk => {
+        this.pushResult(chunk);
+      },
+    };
+
+    this.#add(async () => this.#transform.call(transformContext, chunk));
+  }
+
   /**
    * Queue the transform method.
    * Result is queued to be emitted.
    * Additional chunks can be added through `this.push` method.
    */
-  add(fn: () => PromiseLike<ChunkType | undefined> | ChunkType | undefined, options?: QueueAddOptions): void {
+  #add(fn: () => PromiseLike<ChunkType | undefined> | ChunkType | undefined, options?: QueueAddOptions): void {
+    /* c8 ignore next 3 */
     if (this.#closed) {
       throw new Error('Queue is already closed');
     }
 
     this.#queue
       .add(async () => {
-        try {
-          const result = await fn();
-          if (result !== undefined && result !== null) {
-            this.push(result);
-          }
-
-          this.#nextPromise.resolve();
-        } catch (error: unknown) {
-          this.#nextPromise.reject(error);
+        const result = await fn();
+        if (result !== undefined && result !== null) {
+          this.pushResult(result);
         }
       }, options)
-      .catch(error => {
-        this.#nextPromise.reject(error);
-      });
+      .then(
+        () => {
+          this.#nextPromise.resolve();
+        },
+        error => {
+          this.#nextPromise.reject(error);
+        },
+      );
   }
 
-  createTransformStream(transform: TransformMethod<ChunkType>) {
-    const transformContext: TransformLike<ChunkType> = {
-      push(chunk) {
-        this.push(chunk);
-      },
-    };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const writable = new Transform({
-      objectMode: true,
-      transform: (chunk: ChunkType, _encoding, callback) => {
-        this.add(async () => transform.call(transformContext, chunk));
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        callback();
-      },
-      final: async (cb: (error?: any) => void) => {
+  duplex() {
+    return Duplex.from({
+      readable: Readable.from(this),
+      writable: Duplex.from(async generator => {
+        for await (const chunk of generator) {
+          this.push(chunk);
+        }
+
         await this.close();
-        cb();
-      },
+      }),
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    return Duplex.from({readable: Readable.from(this), writable});
   }
 
   /**
    * Queue chunk to be emitted.
    */
-  protected push(chunk: ChunkType) {
+  protected pushResult(chunk: ChunkType) {
+    /* c8 ignore next 3 */
     if (this.#closed) {
       throw new Error('Queue is already closed');
     }
