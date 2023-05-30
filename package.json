@@ -24,7 +24,7 @@
     "fix": "prettier --write . && xo --fix",
     "prepare": "npm run build",
     "pretest": "prettier --check . && xo",
-    "test": "vitest run"
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "@types/node": "^16.18.31",
