@@ -1,4 +1,4 @@
-import {Readable, Transform, Duplex} from 'node:stream';
+import {Readable, Transform, Duplex} from 'readable-stream';
 
 import PQueue, {type Options, type QueueAddOptions} from 'p-queue';
 
@@ -85,10 +85,12 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
         this.push(chunk);
       },
     };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const writable = new Transform({
       objectMode: true,
       transform: (chunk: ChunkType, _encoding, callback) => {
         this.add(async () => transform.call(transformContext, chunk));
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         callback();
       },
       final: async (cb: (error?: any) => void) => {
@@ -96,6 +98,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
         cb();
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     return Duplex.from({readable: Readable.from(this), writable});
   }
 
