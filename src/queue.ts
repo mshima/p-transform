@@ -52,10 +52,8 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
     while (!this.#closed || this.#queue.size > 0 || this.#queue.pending > 0) {
       // eslint-disable-next-line no-await-in-loop
       await this.#nextPromise;
-      const results = this.#results;
-      this.#results = [];
-      for (const result of results) {
-        yield result;
+      while (this.#results.length > 0) {
+        yield this.#results.shift() as Awaited<ChunkType>;
       }
 
       this.#nextPromise = createPromise<ChunkType>();
