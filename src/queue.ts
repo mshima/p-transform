@@ -49,7 +49,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
   }
 
   async *[Symbol.asyncIterator](): AsyncIterator<ChunkType> {
-    while (!this.#closed || this.#queue.size > 0 || this.#queue.pending > 0) {
+    while (!this.#closed || this.#queue.size > 0 || this.#queue.pending > 0 || this.#results.length > 0) {
       // eslint-disable-next-line no-await-in-loop
       await this.#nextPromise;
       while (this.#results.length > 0) {
