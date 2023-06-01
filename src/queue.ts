@@ -11,6 +11,8 @@ export type TransformLike<T = any> = {push: (chunk: T) => void};
 
 export type TransformMethod<T = any> = (this: TransformLike<T>, chunk: T) => PromiseLike<T | undefined> | T | undefined;
 
+export type DuplexWithDebug = NodeDuplex & {enableDebug: () => NodeDuplex};
+
 // eslint-disable-next-line @typescript-eslint/promise-function-async
 const createPromise = <T>() => {
   let resolve;
@@ -34,6 +36,8 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
   #resolve: OutsidePromise<ChunkType>;
   #results: ChunkType[] = [];
   #transform: TransformMethod<ChunkType>;
+  #logPrefix: string;
+  #debugEnabled = false;
 
   constructor(transform: TransformMethod<ChunkType>, pqueueOptions?: Options<any, QueueAddOptions>) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -41,6 +45,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
     this.#resolve = createPromise<ChunkType>();
     this.#nextPromise = createPromise<ChunkType>();
     this.#transform = transform;
+    this.#logPrefix = Math.random().toString(36).slice(7);
   }
 
   async *[Symbol.asyncIterator](): AsyncIterator<ChunkType> {
@@ -56,6 +61,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
       this.#nextPromise = createPromise<ChunkType>();
     }
 
+    this.debug('queue finished');
     this.#resolve.resolve();
   }
 
@@ -97,8 +103,8 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
       );
   }
 
-  duplex(): NodeDuplex {
-    return Duplex.from({
+  duplex(): DuplexWithDebug {
+    const transform = Duplex.from({
       readable: Readable.from(this),
       writable: Duplex.from(async source => {
         for await (const chunk of source) {
@@ -108,12 +114,20 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
         await this.close();
       }),
     });
+    return Object.assign(transform, {
+      enableDebug: () => {
+        this.#debugEnabled = true;
+        this.debug('debug started');
+        return transform;
+      },
+    });
   }
 
   /**
    * Queue chunk to be emitted.
    */
   protected pushResult(chunk: ChunkType) {
+    this.debug('pushing chunk');
     /* c8 ignore next 3 */
     if (this.#closed) {
       throw new Error('Queue is already closed');
@@ -123,15 +137,24 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
   }
 
   protected async close() {
+    this.debug('closing');
     await this.flush();
 
     this.#closed = true;
     this.#nextPromise.resolve();
     await this.#resolve;
+    this.debug('closed');
   }
 
   protected async flush() {
     await this.#queue.onIdle();
     this.#nextPromise.resolve();
+  }
+
+  private debug(...args: any[]) {
+    if (this.#debugEnabled) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log(`#### ${this.#logPrefix} ####`, ...args);
+    }
   }
 }

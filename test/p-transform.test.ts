@@ -243,4 +243,16 @@ describe('PTransform', () => {
       ).rejects.toThrowError('foo');
     });
   });
+
+  describe('enableDebug', () => {
+    it('should support debug', async () => {
+      vitest.spyOn(console, 'log').mockImplementation(() => {});
+
+      const tr = transform(() => {});
+      tr.enableDebug();
+      await pipeline(Readable.from([{}]), tr);
+
+      expect(console.log).toHaveBeenCalled();
+    });
+  });
 });
