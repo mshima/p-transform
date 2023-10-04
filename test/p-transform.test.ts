@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import {pipeline} from 'node:stream/promises';
-import {describe, beforeEach, it, expect, vitest} from 'vitest';
+import {vi, describe, beforeEach, it, expect, vitest} from 'vitest';
 import {Readable} from 'readable-stream';
 import {stub} from 'sinon';
 import {filter, passthrough, transform} from '../src/index.js';
@@ -84,6 +84,8 @@ describe('PTransform', () => {
     });
 
     describe('transform pipeline', () => {
+      const endSpy = vi.fn();
+
       beforeEach(async () => {
         testTransform = transform(async sample => {
           const returnValue = await sample.transformStep.promise;
@@ -92,7 +94,7 @@ describe('PTransform', () => {
           }
 
           return returnValue;
-        });
+        }, endSpy);
 
         await pipeline(
           sourceTransform,
@@ -108,6 +110,9 @@ describe('PTransform', () => {
         for (const sample of samples) {
           expect(sample.transformStep.spy.callCount).toBe(1);
         }
+      });
+      it('end should be called', () => {
+        expect(endSpy).toBeCalled();
       });
       it('destination spies should be conditionally called', () => {
         for (const sample of samples) {

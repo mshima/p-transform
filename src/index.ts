@@ -8,24 +8,27 @@ export * from './queue.js';
 const pipeline = Stream.promises.pipeline as typeof pipelineType;
 export {pipeline};
 
-export const transform = <ChunkType = any>(transform: TransformMethod<ChunkType>): DuplexWithDebug => {
-  return new OutOfOrder<ChunkType>(transform).duplex();
+export const transform = <ChunkType = any>(transform: TransformMethod<ChunkType>, end?: () => void | Promise<void>): DuplexWithDebug => {
+  return new OutOfOrder<ChunkType>(transform).duplex(end);
 };
 
 /**
  * Shortcut to create a passthrough with spy.
  */
-export const passthrough = <ChunkType = any>(spy?: (chunk: ChunkType) => Promise<void> | void): DuplexWithDebug =>
+export const passthrough = <ChunkType = any>(
+  spy?: (chunk: ChunkType) => Promise<void> | void,
+  end?: () => void | Promise<void>,
+): DuplexWithDebug =>
   transform(async (chunk: ChunkType) => {
     await spy?.(chunk);
     return chunk;
-  });
+  }, end);
 
 /**
  * Create a filter stream.
  */
-export const filter = <ChunkType = any>(filter: (chunk: ChunkType) => boolean | Promise<boolean>): DuplexWithDebug =>
+export const filter = <ChunkType = any>(filter: (chunk: ChunkType) => boolean | Promise<boolean>, end?: () => void): DuplexWithDebug =>
   transform(async function (chunk: ChunkType) {
     const result = await filter(chunk);
     return result ? chunk : undefined;
-  });
+  }, end);

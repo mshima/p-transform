@@ -101,7 +101,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
       );
   }
 
-  duplex(): DuplexWithDebug {
+  duplex(end?: () => void | Promise<void>): DuplexWithDebug {
     const transform = Duplex.from({
       readable: Readable.from(this),
       writable: Duplex.from(async source => {
@@ -109,6 +109,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
           this.push(chunk as ChunkType);
         }
 
+        await end?.call?.(this);
         await this.close();
       }),
     });
