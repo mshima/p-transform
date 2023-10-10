@@ -10,7 +10,7 @@ export {pipeline};
 
 export const transform = <ChunkType = any>(
   transform: TransformMethod<ChunkType>,
-  end?: (this: {push: (ChunkType) => void}) => void | Promise<void>,
+  end?: (this: {push: (chunk: ChunkType) => void}) => void | Promise<void>,
 ): DuplexWithDebug => {
   return new OutOfOrder<ChunkType>(transform).duplex(end);
 };
@@ -20,7 +20,7 @@ export const transform = <ChunkType = any>(
  */
 export const passthrough = <ChunkType = any>(
   spy?: (chunk: ChunkType) => Promise<void> | void,
-  end?: (this: {push: (ChunkType) => void}) => void | Promise<void>,
+  end?: (this: {push: (chunk: ChunkType) => void}) => void | Promise<void>,
 ): DuplexWithDebug =>
   transform(async (chunk: ChunkType) => {
     await spy?.(chunk);
@@ -32,7 +32,7 @@ export const passthrough = <ChunkType = any>(
  */
 export const filter = <ChunkType = any>(
   filter: (chunk: ChunkType) => boolean | Promise<boolean>,
-  end?: (this: {push: (ChunkType) => void}) => void,
+  end?: (this: {push: (chunk: ChunkType) => void}) => void,
 ): DuplexWithDebug =>
   transform(async function (chunk: ChunkType) {
     const result = await filter(chunk);
