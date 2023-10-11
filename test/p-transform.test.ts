@@ -77,14 +77,21 @@ describe('PTransform', () => {
 
       sourceTransform = Readable.from(samples);
       destinationTransform = transform(async sample => {
+        sample.endSampleSpy?.();
+
         destSamples.push(sample);
-        sample.destinationStep.spy();
-        sample.destinationStep.resolve();
+        if (sample.destinationStep) {
+          sample.destinationStep.spy();
+          sample.destinationStep.resolve();
+        }
       });
     });
 
     describe('transform pipeline', () => {
-      const endSpy = vi.fn();
+      const endSample = {sample: {endSampleSpy: vi.fn()}};
+      const endSpy = vi.fn(function () {
+        this.push(endSample);
+      });
 
       beforeEach(async () => {
         testTransform = transform(async sample => {
@@ -114,6 +121,9 @@ describe('PTransform', () => {
       it('end should be called', () => {
         expect(endSpy).toBeCalled();
       });
+      it('end sample should be emitted', () => {
+        expect(endSample.sample.endSampleSpy).toBeCalled();
+      });
       it('destination spies should be conditionally called', () => {
         for (const sample of samples) {
           assert.equal(sample.destinationStep.spy.callCount, sample.resolveValue ? 1 : 0);
@@ -131,10 +141,7 @@ describe('PTransform', () => {
         }
       });
       it('destination samples should match the resolved values', () => {
-        assert.deepStrictEqual(
-          destSamples,
-          samplesToResolve.filter(sample => sample.resolveValue),
-        );
+        assert.deepStrictEqual(destSamples, [...samplesToResolve.filter(sample => sample.resolveValue), endSample.sample]);
       });
     });
 

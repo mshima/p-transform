@@ -109,7 +109,12 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
           this.push(chunk as ChunkType);
         }
 
-        await end?.call?.(this);
+        await this.flush();
+        await end?.call?.({
+          push: chunk => {
+            this.pushResult(chunk);
+          },
+        });
         await this.close();
       }),
     });
