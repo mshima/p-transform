@@ -1,7 +1,6 @@
-import type {Duplex} from 'node:stream';
 import type {pipeline as pipelineType} from 'node:stream/promises';
 import {Stream} from 'readable-stream';
-import {type DuplexWithDebug, OutOfOrder, type TransformMethod} from './queue.js';
+import {type DuplexWithDebug, OutOfOrder, type TransformMethod, type TransformLike} from './queue.js';
 
 export * from './queue.js';
 
@@ -10,7 +9,7 @@ export {pipeline};
 
 export const transform = <ChunkType = any>(
   transform: TransformMethod<ChunkType>,
-  end?: (this: {push: (chunk: ChunkType) => void}) => void | Promise<void>,
+  end?: (this: TransformLike<ChunkType>) => void | Promise<void>,
 ): DuplexWithDebug => {
   return new OutOfOrder<ChunkType>(transform).duplex(end);
 };
@@ -19,11 +18,11 @@ export const transform = <ChunkType = any>(
  * Shortcut to create a passthrough with spy.
  */
 export const passthrough = <ChunkType = any>(
-  spy?: (chunk: ChunkType) => Promise<void> | void,
-  end?: (this: {push: (chunk: ChunkType) => void}) => void | Promise<void>,
+  spy?: (this: TransformLike<ChunkType>, chunk: ChunkType) => Promise<void> | void,
+  end?: (this: TransformLike<ChunkType>) => void | Promise<void>,
 ): DuplexWithDebug =>
-  transform(async (chunk: ChunkType) => {
-    await spy?.(chunk);
+  transform(async function (chunk: ChunkType) {
+    await spy?.call(this, chunk);
     return chunk;
   }, end);
 
@@ -32,7 +31,7 @@ export const passthrough = <ChunkType = any>(
  */
 export const filter = <ChunkType = any>(
   filter: (chunk: ChunkType) => boolean | Promise<boolean>,
-  end?: (this: {push: (chunk: ChunkType) => void}) => void,
+  end?: (this: TransformLike<ChunkType>) => void,
 ): DuplexWithDebug =>
   transform(async function (chunk: ChunkType) {
     const result = await filter(chunk);
