@@ -1,4 +1,5 @@
 import type {Readable as NodeReadable, Duplex as NodeDuplex} from 'node:stream';
+import {setTimeout} from 'node:timers/promises';
 import {Readable as _Readable, Duplex as _Duplex} from 'readable-stream';
 import PQueue, {type Options, type QueueAddOptions} from 'p-queue';
 
@@ -107,6 +108,11 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
       writable: Duplex.from(async source => {
         for await (const chunk of source) {
           this.push(chunk as ChunkType);
+          // Wait next tick to continue.
+          // Improves responsiveness since it prioritize chunks to pass through the entire pipeline instead of buffering in a transform.
+          if (this.#queue.pending > 1) {
+            await setTimeout();
+          }
         }
 
         await this.flush();
