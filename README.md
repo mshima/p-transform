@@ -4,27 +4,28 @@ Promised out of order transform.
 
 ## Usage
 
-A [Transform](https://nodejs.org/api/stream.html#implementing-a-transform-stream) that uses objectMode and implements custom `_write` and `_flush` methods.
+Builds a out-of-order [Duplex](https://nodejs.org/api/stream.html#class-streamduplex) using a [p-queue](https://github.com/sindresorhus/p-queue) parallel queue.
 `transform` implementation must be sync or return a promise. Callback is not supported.
 
 Promisified `pipeline` and `transform` shortcut are provided for convenience.
 
 ```
-import PTransform, { transform, pipeline } from 'p-transform';
+import { OutOfOrder, transform, pipeline, passthrough, filter } from 'p-transform';
 
 await pipeline(
-  new PTransform({
-    transform: async file => file
-  }),
-  transform(async file => file);
+  new OutOfOrder(
+    { transform: async file => file },
+    { concurrency: 7 },
+  ).duplex(() => console.log('done')),
+  passthrough(async file => {}, () => console.log('done')),
+  filter(async file => true, () => console.log('done')),
+  transform(async file => file, () => console.log('done')),
 )
 ```
 
 ## Debug
 
 Use `DEBUG=p-transform:*` environment variable.
-
-For custom debug name set `logName` option at PTransform constructor or `transform` argument.
 
 ## License
 
@@ -35,7 +36,7 @@ Apache-2.0
 ## Classes
 
 <dl>
-<dt><a href="#PTransform">PTransform</a></dt>
+<dt><a href="#OutOfOrder">OutOfOrder</a></dt>
 <dd></dd>
 </dl>
 
@@ -50,78 +51,52 @@ Apache-2.0
 ## Functions
 
 <dl>
-<dt><a href="#transform">transform(transform, logName)</a></dt>
-<dd><p>Shortcut to create a PTransform with transform and logName.</p>
+<dt><a href="#transform">transform(transform, end)</a></dt>
+<dd><p>Shortcut to create a OutOfOrder with transform and end callback</p>
 </dd>
-<dt><a href="#passthrough">passthrough(spy, logName)</a></dt>
-<dd><p>Shortcut to create a passthrough PTransform with spy and logName.</p>
+<dt><a href="#passthrough">passthrough(spy, end)</a></dt>
+<dd><p>Shortcut to create a passthrough OutOfOrder with spy and end callback</p>
 </dd>
-<dt><a href="#filter">filter(filter, logName)</a></dt>
-<dd><p>Shortcut to create a filter PTransform with filter and logName.</p>
+<dt><a href="#filter">filter(filter, end)</a></dt>
+<dd><p>Shortcut to create a filter OutOfOrder with filter and end callback</p>
 </dd>
 </dl>
 
-<a name="PTransform"></a>
+<a name="OutOfOrder"></a>
 
-## PTransform
+## OutOfOrder
 
 **Kind**: global class
 
-- [PTransform](#PTransform)
-  - [new PTransform([options])](#new_PTransform_new)
-  - [.name(name)](#PTransform+name) ⇒ [<code>PTransform</code>](#PTransform)
-  - [.flushQueue()](#PTransform+flushQueue) ⇒
-  - [.queuedTransform(chunk, encoding)](#PTransform+queuedTransform) ⇒
+- [OutOfOrder](#OutOfOrder)
+  - [new OutOfOrder(transform[, options])](#new_OutOfOrder_new)
+  - [.duplex(endCallback)](#OutOfOrder+duplex) ⇒ [<code>Duplex</code>](https://nodejs.org/api/stream.html#class-streamduplex)
 
-<a name="new_PTransform_new"></a>
+<a name="new_OutOfOrder_new"></a>
 
-### new PTransform([options])
+### new OutOfOrder(transform[, queueOptions])
 
-PTransform
+OutOfOrder
 
-| Param                  | Type                  | Description                            |
-| ---------------------- | --------------------- | -------------------------------------- |
-| [options]              | <code>Object</code>   | Options object forwarded to Transform. |
-| [options.logName]      | <code>String</code>   | Custom name for logger.                |
-| [options.transform]    | <code>function</code> | Transform function.                    |
-| [options.queueOptions] | <code>Object</code>   | Options forwarded to PQueue instance.  |
+| Param          | Type                    | Description                            |
+| -------------- | ----------------------- | -------------------------------------- |
+| [transform]    | <code>function</code>   | Transform.  |
+| [queueOptions] | <code>Object</code>     | Options forwarded to PQueue instance.  |
 
-<a name="PTransform+name"></a>
+<a name="OutOfOrder+duplex"></a>
 
-### pTransform.name(name) ⇒ [<code>PTransform</code>](#PTransform)
+### outOfOrder.duplex(end) ⇒ [<code>Duplex</code>](https://nodejs.org/api/stream.html#class-streamduplex)
 
-Set log name.
+Build Duplex.
 
-**Kind**: instance method of [<code>PTransform</code>](#PTransform)
-**Returns**: [<code>PTransform</code>](#PTransform) - this
+**Kind**: instance method of [<code>OutOfOrder</code>](#OutOfOrder)
+**Returns**: [<code>Duplex</code>](https://nodejs.org/api/stream.html#class-streamduplex)
 
-| Param | Type                |
-| ----- | ------------------- |
-| name  | <code>String</code> |
+| Param | Type                  |
+| ----- | --------------------- |
+| end   | <code>function</code> |
 
-<a name="PTransform+flushQueue"></a>
-
-### pTransform.flushQueue() ⇒
-
-Wait for queue idle.
-
-**Kind**: instance method of [<code>PTransform</code>](#PTransform)
-**Returns**: Promise<void>
-<a name="PTransform+queuedTransform"></a>
-
-### pTransform.queuedTransform(chunk, encoding) ⇒
-
-Queued transform operation.
-
-**Kind**: instance method of [<code>PTransform</code>](#PTransform)
-**Returns**: Promise
-
-| Param    | Type                |
-| -------- | ------------------- |
-| chunk    | <code>Object</code> |
-| encoding | <code>String</code> |
-
-<a name="pipeline"></a>
+<a name="OutOfOrder+flushQueue"></a>
 
 ## pipeline
 
@@ -130,39 +105,39 @@ Promisified pipeline
 **Kind**: global constant
 <a name="transform"></a>
 
-## transform(transform, logName)
+## transform(transform, end)
 
-Shortcut to create a PTransform with transform and logName.
+Shortcut to create a OutOfOrder with transform and end callback.
 
 **Kind**: global function
 
 | Param     | Type                  |
 | --------- | --------------------- |
 | transform | <code>function</code> |
-| logName   | <code>String</code>   |
+| end       | <code>function</code> |
 
 <a name="passthrough"></a>
 
-## passthrough(spy, logName)
+## passthrough(spy, end)
 
-Shortcut to create a passthrough PTransform with spy and logName.
+Shortcut to create a passthrough OutOfOrder with spy and end callback.
 
 **Kind**: global function
 
 | Param   | Type                  |
 | ------- | --------------------- |
 | spy     | <code>function</code> |
-| logName | <code>String</code>   |
+| end     | <code>function</code> |
 
 <a name="filter"></a>
 
-## filter(filter, logName)
+## filter(filter, end)
 
-Shortcut to create a filter PTransform with filter and logName.
+Shortcut to create a filter OutOfOrder with filter and end callback.
 
 **Kind**: global function
 
 | Param   | Type                  |
 | ------- | --------------------- |
 | filter  | <code>function</code> |
-| logName | <code>String</code>   |
+| end     | <code>function</code> |
