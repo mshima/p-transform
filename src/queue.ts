@@ -18,6 +18,7 @@ export type DuplexWithDebug = NodeDuplex & {enableDebug: () => NodeDuplex};
 const createPromise = <T>() => {
   let resolve;
   let reject;
+  // eslint-disable-next-line promise/param-names
   const promise = new Promise<T>((promiseResolve, promiseReject) => {
     resolve = promiseResolve;
     reject = promiseReject;
@@ -31,13 +32,13 @@ const createPromise = <T>() => {
  * Out of orderer queue result emitter.
  */
 export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
-  #queue: PQueue;
+  readonly #queue: PQueue;
   #closed = false;
   #nextPromise: OutsidePromise<ChunkType>;
-  #resolve: OutsidePromise<ChunkType>;
-  #results: ChunkType[] = [];
-  #transform: TransformMethod<ChunkType>;
-  #logPrefix: string;
+  readonly #resolve: OutsidePromise<ChunkType>;
+  readonly #results: ChunkType[] = [];
+  readonly #transform: TransformMethod<ChunkType>;
+  readonly #logPrefix: string;
   #debugEnabled = false;
 
   constructor(transform: TransformMethod<ChunkType>, pqueueOptions?: Options<any, QueueAddOptions>) {
@@ -79,7 +80,7 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
    * Result is queued to be emitted.
    * Additional chunks can be added through `this.push` method.
    */
-  #add(fn: () => PromiseLike<ChunkType | undefined> | ChunkType | undefined, options?: QueueAddOptions): void {
+  #add(function_: () => PromiseLike<ChunkType | undefined> | ChunkType | undefined, options?: QueueAddOptions): void {
     /* c8 ignore next 3 */
     if (this.#closed) {
       throw new Error('Queue is already closed');
@@ -87,16 +88,17 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
 
     this.#queue
       .add(async () => {
-        const result = await fn();
+        const result = await function_();
         if (result !== undefined && result !== null) {
           this.pushResult(result);
         }
       }, options)
+      // eslint-disable-next-line promise/prefer-await-to-then
       .then(
         () => {
           this.#nextPromise.resolve();
         },
-        error => {
+        (error: Error) => {
           this.#nextPromise.reject(error);
         },
       );
@@ -161,10 +163,10 @@ export class OutOfOrder<ChunkType> implements AsyncIterable<ChunkType> {
     this.#nextPromise.resolve();
   }
 
-  private debug(...args: any[]) {
+  private debug(...arguments_: any[]) {
     if (this.#debugEnabled) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      console.log(`#### ${this.#logPrefix} ####`, ...args);
+      console.log(`#### ${this.#logPrefix} ####`, ...arguments_);
     }
   }
 }

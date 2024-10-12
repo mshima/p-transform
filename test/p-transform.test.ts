@@ -11,7 +11,7 @@ describe('PTransform', () => {
   describe('transforms', () => {
     let samples;
     let samplesToResolve;
-    let destSamples;
+    let destinationSamples;
 
     let sourceTransform;
     let testTransform;
@@ -21,7 +21,7 @@ describe('PTransform', () => {
 
     beforeEach(() => {
       samples = [];
-      destSamples = [];
+      destinationSamples = [];
       for (let i = 1; i <= SAMPLES_SIZE; i++) {
         const shouldReturn = Math.random() < 0.8;
         const sample = {
@@ -36,6 +36,7 @@ describe('PTransform', () => {
         {
           let resolve;
           const spy = stub();
+          // eslint-disable-next-line promise/param-names
           const promise = new Promise(inResolve => {
             resolve = inResolve;
           });
@@ -52,6 +53,7 @@ describe('PTransform', () => {
         {
           let resolve;
           const spy = stub();
+          // eslint-disable-next-line promise/param-names
           const promise = new Promise(inResolve => {
             resolve = inResolve;
           });
@@ -79,7 +81,7 @@ describe('PTransform', () => {
       destinationTransform = transform(async sample => {
         sample.endSampleSpy?.();
 
-        destSamples.push(sample);
+        destinationSamples.push(sample);
         if (sample.destinationStep) {
           sample.destinationStep.spy();
           sample.destinationStep.resolve();
@@ -141,7 +143,7 @@ describe('PTransform', () => {
         }
       });
       it('destination samples should match the resolved values', () => {
-        assert.deepStrictEqual(destSamples, [...samplesToResolve.filter(sample => sample.resolveValue), endSample.sample]);
+        assert.deepStrictEqual(destinationSamples, [...samplesToResolve.filter(sample => sample.resolveValue), endSample.sample]);
       });
     });
 
@@ -178,7 +180,7 @@ describe('PTransform', () => {
       });
       it('destination samples should match the filtered samples', () => {
         assert.deepStrictEqual(
-          destSamples,
+          destinationSamples,
           samplesToResolve.filter(sample => sample.resolveValue),
         );
       });
@@ -209,7 +211,7 @@ describe('PTransform', () => {
         }
       });
       it('destination samples should match the shuffled samples', () => {
-        assert.deepStrictEqual(destSamples, samplesToResolve);
+        assert.deepStrictEqual(destinationSamples, samplesToResolve);
       });
     });
   });
