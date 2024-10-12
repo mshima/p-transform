@@ -1,10 +1,6 @@
-import type {Readable as NodeReadable, Duplex as NodeDuplex} from 'node:stream';
+import {Readable, Duplex} from 'node:stream';
 import {setTimeout} from 'node:timers/promises';
-import {Readable as _Readable, Duplex as _Duplex} from 'readable-stream';
 import PQueue, {type Options, type QueueAddOptions} from 'p-queue';
-
-const Readable = _Readable as typeof NodeReadable;
-const Duplex = _Duplex as typeof NodeDuplex;
 
 type OutsidePromise<T> = Promise<T> & {resolve: () => void; reject: (error: any) => void};
 
@@ -12,7 +8,7 @@ export type TransformLike<T = any> = {push: (chunk: T) => void};
 
 export type TransformMethod<T = any> = (this: TransformLike<T>, chunk: T) => PromiseLike<T | undefined> | T | undefined;
 
-export type DuplexWithDebug = NodeDuplex & {enableDebug: () => NodeDuplex};
+export type DuplexWithDebug = Duplex & {enableDebug: () => Duplex};
 
 // eslint-disable-next-line @typescript-eslint/promise-function-async
 const createPromise = <T>() => {

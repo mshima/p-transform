@@ -1,7 +1,7 @@
 import assert from 'node:assert';
+import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {vi, describe, beforeEach, it, expect, vitest} from 'vitest';
-import {Readable} from 'readable-stream';
 import {stub} from 'sinon';
 import {filter, passthrough, transform} from '../src/index.js';
 
@@ -9,7 +9,7 @@ const SAMPLES_SIZE = 100;
 
 describe('PTransform', () => {
   describe('transforms', () => {
-    let samples;
+    let samples: any[];
     let samplesToResolve;
     let destinationSamples;
 
