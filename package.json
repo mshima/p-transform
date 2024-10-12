@@ -27,7 +27,7 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "@types/node": "^16.18.31",
+    "@types/node": ">=16.18.31",
     "p-queue": "^7.3.0",
     "readable-stream": "^4.3.0"
   },
