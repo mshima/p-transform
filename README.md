@@ -78,10 +78,10 @@ Apache-2.0
 
 OutOfOrder
 
-| Param          | Type                    | Description                            |
-| -------------- | ----------------------- | -------------------------------------- |
-| [transform]    | <code>function</code>   | Transform.  |
-| [queueOptions] | <code>Object</code>     | Options forwarded to PQueue instance.  |
+| Param          | Type                  | Description                           |
+| -------------- | --------------------- | ------------------------------------- |
+| [transform]    | <code>function</code> | Transform.                            |
+| [queueOptions] | <code>Object</code>   | Options forwarded to PQueue instance. |
 
 <a name="OutOfOrder+duplex"></a>
 
@@ -124,10 +124,10 @@ Shortcut to create a passthrough OutOfOrder with spy and end callback.
 
 **Kind**: global function
 
-| Param   | Type                  |
-| ------- | --------------------- |
-| spy     | <code>function</code> |
-| end     | <code>function</code> |
+| Param | Type                  |
+| ----- | --------------------- |
+| spy   | <code>function</code> |
+| end   | <code>function</code> |
 
 <a name="filter"></a>
 
@@ -137,7 +137,7 @@ Shortcut to create a filter OutOfOrder with filter and end callback.
 
 **Kind**: global function
 
-| Param   | Type                  |
-| ------- | --------------------- |
-| filter  | <code>function</code> |
-| end     | <code>function</code> |
+| Param  | Type                  |
+| ------ | --------------------- |
+| filter | <code>function</code> |
+| end    | <code>function</code> |
